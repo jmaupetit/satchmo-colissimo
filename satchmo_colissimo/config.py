@@ -25,7 +25,7 @@ config_register_list(
                  help_text=_("Set the default recommanded level from 0 to 5 corresponding to R0-R5"),
                  default=0 ),
                  
-    DecimalValue(SHIPPING_GROUP,
+    StringValue(SHIPPING_GROUP,
                  'BOX_DEFAULT_WEIGHT',
                  description=_("Colissimo box default weight"),
                  help_text=_("Set the default weight in Kg"),

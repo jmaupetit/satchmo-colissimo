@@ -85,7 +85,7 @@ class Shipper(BaseShipper):
         settings = config_get_group( SHIP_MODULE_NAME )
         
         # Compute cart total weight
-        total_weight = float(str(settings.BOX_DEFAULT_WEIGHT.value))
+        total_weight = float(settings.BOX_DEFAULT_WEIGHT.value)
         for product in cart.get_shipment_list():
             try:
                 total_weight += float( product.smart_attr('weight') )
