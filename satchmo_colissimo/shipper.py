@@ -86,24 +86,38 @@ class Shipper(BaseShipper):
         
         # Compute cart total weight
         total_weight = float(settings.BOX_DEFAULT_WEIGHT.value)
-        for product in cart.get_shipment_list():
+        try:
+            cart_products = cart.get_shipment_list()
+        except:
+            # We should have raised an exception ...
+            cart_products = []
+
+        products_weight = 0
+        for product in cart_products:
             try:
-                total_weight += float( product.smart_attr('weight') )
+                products_weight += float( product.smart_attr('weight') )
             except TypeError:
                 log.debug( "Pass: " + str( product.smart_attr('weight') )  )
                 pass
-            log.debug( "Updated total weight to " + str(total_weight) )
-        
-        rate = Rate()
-        rs = rate.get_rates( contact.shipping_address.country.name, total_weight )
-        # Quick and dirty (enought for my customer...)
-        level = settings.RECOMMANDED_DEFAULT_LEVEL.value
-        if level > 5:
-            level = 0
+            log.debug( "Updated total weight to " + str(total_weight+products_weight) )
+        total_weight += products_weight
 
-        log.debug( "Rates: %s - Level %s - Rate: %.2f (weight: %.2f price: %.2f)" % (str(rs), level, rs[ level ].price, total_weight, cart.total ) )
-        
-        self.charges = Decimal( rs[ level ].price )
-        
-        self.is_valid = True
-        self._calculated = True
+        if not products_weight:
+            self.charges = Decimal("0.0")
+            self.is_valid = False
+            self._calculated = True
+            log.error("Input cart is empty")
+        else:
+            rate= Rate()
+            rs = rate.get_rates( contact.shipping_address.country.name, total_weight )
+            # Quick and dirty (enought for my customer...)
+            level = settings.RECOMMANDED_DEFAULT_LEVEL.value
+            if level > 5:
+                level = 0
+
+            log.debug( "Rates: %s - Level %s - Rate: %.2f (weight: %.2f price: %.2f)" % (str(rs), level, rs[ level ].price, total_weight, cart.total ) )
+            
+            self.charges = Decimal( rs[ level ].price )
+            
+            self.is_valid = True
+            self._calculated = True
