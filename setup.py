@@ -1,7 +1,7 @@
 """Installation script for satchmo-colissimo
 """
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name = "satchmo-colissimo",
