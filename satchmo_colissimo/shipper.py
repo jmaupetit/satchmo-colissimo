@@ -26,16 +26,16 @@ class Shipper(BaseShipper):
         self.contact = contact
 
         self.id = u'colissimo'
-        
+
         if cart or contact:
             self.calculate(cart, contact)
-            
+
     def __str__(self):
         """
         This is mainly helpful for debugging purposes
         """
         return "Colissimo"
-        
+
     def description(self):
         """
         A basic description that will be displayed to the user when selecting their shipping options
@@ -74,16 +74,16 @@ class Shipper(BaseShipper):
         Calculates rates according to colissimo 2012 rates (see
         django-colissimo app)
         """
-        
+
         self.cart = cart
         self.contact = contact
-        
+
         log.debug("Starting LaPoste Colissimo calculations")
-        
+
         self.is_valid = False
 
         settings = config_get_group( SHIP_MODULE_NAME )
-        
+
         # Compute cart total weight
         total_weight = float(settings.BOX_DEFAULT_WEIGHT.value)
         try:
@@ -109,15 +109,15 @@ class Shipper(BaseShipper):
             log.error("Input cart is empty")
         else:
             rate= Rate()
-            rs = rate.get_rates( contact.shipping_address.country.name, total_weight )
+            rs = rate.get_rates( contact.shipping_address.country.printable_name, total_weight )
             # Quick and dirty (enought for my customer...)
             level = settings.RECOMMANDED_DEFAULT_LEVEL.value
             if level > 5:
                 level = 0
 
             log.debug( "Rates: %s - Level %s - Rate: %.2f (weight: %.2f price: %.2f)" % (str(rs), level, rs[ level ].price, total_weight, cart.total ) )
-            
+
             self.charges = Decimal( rs[ level ].price )
-            
+
             self.is_valid = True
             self._calculated = True
